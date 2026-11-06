@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pencarian data buku">
+    <title>Cari Buku</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 750px; margin: 25px auto; padding: 0 16px; }
+        .field { margin-bottom: 14px; }
+        input, select { width: 100%; max-width: 500px; padding: 9px; box-sizing: border-box; }
+        button { padding: 9px 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Pencarian Buku</h1>
+    <form action="hasil.html" method="get">
+        <div class="field">
+            <label for="kata">Kata Kunci Judul atau Penulis:</label><br>
+            <input type="text" id="kata" name="kata" required
+                   placeholder="Contoh: Bumi atau Tere Liye">
+        </div>
+
+        <div class="field">
+            <label for="kategori">Kategori:</label><br>
+            <select id="kategori" name="kategori" required>
+                <option value="">-- Pilih Kategori --</option>
+                <option value="1">Novel</option>
+                <option value="2">Pendidikan</option>
+                <option value="3">Komputer</option>
+                <option value="4">Sejarah</option>
+            </select>
+        </div>
+
+        <button type="submit">Cari Buku</button>
+    </form>
+    <p>Data pencarian dikirim menggunakan method GET sehingga kata dan kategori terlihat pada alamat browser.</p>
+</body>
+</html>

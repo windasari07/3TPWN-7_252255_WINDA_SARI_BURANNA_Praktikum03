@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hasil pencarian buku">
+    <title>Hasil Pencarian Buku</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 850px; margin: 25px auto; padding: 0 16px; line-height: 1.5; }
+        .buku { border: 1px solid #999; border-radius: 8px; padding: 14px; margin: 14px 0; }
+        .buku h3 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>Hasil Pencarian Buku</h1>
+    <p id="info"></p>
+    <div id="daftarHasil"></div>
+    <p><a href="cari.html">Kembali ke Pencarian</a></p>
+
+    <script>
+        const parameter = new URLSearchParams(window.location.search);
+        const kata = (parameter.get("kata") || "").trim().toLowerCase();
+        const kategoriId = parameter.get("kategori");
+        const kategoriNama = {
+            "1": "Novel",
+            "2": "Pendidikan",
+            "3": "Komputer",
+            "4": "Sejarah"
+        };
+
+        const info = document.getElementById("info");
+        const daftarHasil = document.getElementById("daftarHasil");
+
+        info.textContent = `Kata kunci: "${kata}" | Kategori: ${kategoriNama[kategoriId] || "Tidak dipilih"}`;
+
+        function aman(teks) {
+            return String(teks ?? "-").replace(/[&<>"']/g, function(karakter) {
+                return {
+                    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+                    '"': "&quot;", "'": "&#039;"
+                }[karakter];
+            });
+        }
+
+        if (!kata || !kategoriNama[kategoriId]) {
+            daftarHasil.textContent = "Kata kunci atau kategori belum lengkap. Silakan kembali ke halaman pencarian.";
+        } else {
+            let buku = [];
+            try {
+                buku = JSON.parse(localStorage.getItem("daftarBuku") || "[]");
+            } catch (error) {
+                console.error("Data buku tidak dapat dibaca:", error);
+            }
+
+            const cocok = buku.filter(function(item) {
+                const cocokKategori = item.kategoriId === kategoriId;
+                const cocokKata =
+                    (item.judul || "").toLowerCase().includes(kata) ||
+                    (item.penulis || "").toLowerCase().includes(kata);
+                return cocokKategori && cocokKata;
+            });
+
+            if (cocok.length === 0) {
+                daftarHasil.textContent = "Buku tidak ditemukan. Pastikan buku sudah ditambahkan melalui Form Tambah Buku dan kategori pencarian sudah benar.";
+            } else {
+                cocok.forEach(function(item) {
+                    const kartu = document.createElement("section");
+                    kartu.className = "buku";
+                    kartu.innerHTML = `
+                        <h3>${aman(item.judul)}</h3>
+                        <p><strong>Penulis:</strong> ${aman(item.penulis)}</p>
+                        <p><strong>Kategori:</strong> ${aman(item.kategori)}</p>
+                        <p><strong>Tahun Terbit:</strong> ${aman(item.tahun)}</p>
+                        <p><strong>Stok:</strong> ${aman(item.stok)}</p>
+                        <p><strong>ISBN:</strong> ${aman(item.isbn || "-")}</p>
+                        <p><strong>Tanggal Terbit:</strong> ${aman(item.tanggal || "-")}</p>
+                        <p><strong>Bahasa:</strong> ${aman(item.bahasa || "-")}</p>
+                        <p><strong>Buku Langka:</strong> ${aman(item.langka || "Tidak")}</p>
+                        <p><strong>Situs Penerbit:</strong>
+                            ${item.situs ? `<a href="${aman(item.situs)}" target="_blank" rel="noopener">${aman(item.situs)}</a>` : "-"}</p>
+                        <p><strong>Sinopsis:</strong> ${aman(item.sinopsis || "-")}</p>
+                    `;
+                    daftarHasil.appendChild(kartu);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

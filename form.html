@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Form untuk menambahkan data buku">
+    <title>Tambah Buku</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 850px; margin: 25px auto; padding: 0 16px; line-height: 1.5; }
+        fieldset { margin-bottom: 18px; padding: 16px; }
+        label { display: inline-block; margin-bottom: 5px; }
+        input:not([type="radio"]):not([type="checkbox"]), select, textarea { width: 100%; max-width: 520px; padding: 8px; box-sizing: border-box; }
+        .field { margin-bottom: 12px; }
+        button { padding: 9px 16px; margin-right: 6px; cursor: pointer; }
+        #pesan { margin: 15px 0; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Form Tambah Buku</h1>
+    <p>Isi data buku di bawah ini. Data yang disimpan dapat dicari melalui menu Cari Buku.</p>
+
+    <form id="formBuku" action="#" method="post">
+        <fieldset>
+            <legend>Data Buku</legend>
+
+            <div class="field">
+                <label for="judul">Judul Buku:</label><br>
+                <input type="text" id="judul" name="judul" required minlength="2"
+                       placeholder="Contoh: Laskar Pelangi">
+            </div>
+
+            <div class="field">
+                <label for="penulis">Penulis:</label><br>
+                <input type="text" id="penulis" name="penulis" required minlength="2"
+                       placeholder="Nama penulis">
+            </div>
+
+            <div class="field">
+                <label for="kategori">Kategori:</label><br>
+                <select id="kategori" name="kategori" required>
+                    <option value="">-- Pilih Kategori --</option>
+                    <option value="1">Novel</option>
+                    <option value="2">Pendidikan</option>
+                    <option value="3">Komputer</option>
+                    <option value="4">Sejarah</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="tahun">Tahun Terbit:</label><br>
+                <input type="number" id="tahun" name="tahun" min="1900" max="2026"
+                       required placeholder="Contoh: 2005">
+            </div>
+
+            <div class="field">
+                <label for="stok">Stok Buku:</label><br>
+                <input type="number" id="stok" name="stok" min="0" max="1000"
+                       step="1" required placeholder="Contoh: 10">
+            </div>
+
+            <div class="field">
+                <label for="isbn">ISBN:</label><br>
+                <input type="text" id="isbn" name="isbn"
+                       pattern="[0-9]{10,13}"
+                       title="ISBN harus terdiri dari 10 sampai 13 angka"
+                       placeholder="10 sampai 13 angka">
+            </div>
+
+            <div class="field">
+                <label for="tanggal">Tanggal Terbit:</label><br>
+                <input type="date" id="tanggal" name="tanggal">
+            </div>
+
+            <div class="field">
+                <label for="situs">Situs Penerbit:</label><br>
+                <input type="url" id="situs" name="situs"
+                       placeholder="https://contoh.com">
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Informasi Tambahan</legend>
+
+            <p>Bahasa:</p>
+            <input type="radio" id="indonesia" name="bahasa" value="Indonesia" required>
+            <label for="indonesia">Indonesia</label>
+
+            <input type="radio" id="inggris" name="bahasa" value="Inggris">
+            <label for="inggris">Inggris</label>
+
+            <div class="field" style="margin-top: 12px;">
+                <input type="checkbox" id="langka" name="langka" value="Ya">
+                <label for="langka">Buku Langka</label>
+            </div>
+
+            <div class="field">
+                <label for="sinopsis">Sinopsis:</label><br>
+                <textarea id="sinopsis" name="sinopsis" rows="5"
+                          placeholder="Tuliskan sinopsis singkat buku"></textarea>
+            </div>
+        </fieldset>
+
+        <button type="submit">Simpan Buku</button>
+        <button type="reset">Reset</button>
+    </form>
+
+    <p id="pesan" aria-live="polite"></p>
+    <div id="hasilSimpan"></div>
+
+    <script>
+        const form = document.getElementById("formBuku");
+        const pesan = document.getElementById("pesan");
+        const hasilSimpan = document.getElementById("hasilSimpan");
+
+        const namaKategori = {
+            "1": "Novel",
+            "2": "Pendidikan",
+            "3": "Komputer",
+            "4": "Sejarah"
+        };
+
+        form.addEventListener("submit", function(event) {
+            // Mencegah browser mengirim form ke server yang belum tersedia.
+            event.preventDefault();
+
+            // Validasi bawaan HTML tetap berjalan sebelum event submit dipanggil.
+            const dataForm = new FormData(form);
+            const buku = {
+                id: Date.now().toString(),
+                judul: dataForm.get("judul").trim(),
+                penulis: dataForm.get("penulis").trim(),
+                kategoriId: dataForm.get("kategori"),
+                kategori: namaKategori[dataForm.get("kategori")],
+                tahun: dataForm.get("tahun"),
+                stok: dataForm.get("stok"),
+                isbn: dataForm.get("isbn"),
+                tanggal: dataForm.get("tanggal"),
+                situs: dataForm.get("situs"),
+                bahasa: dataForm.get("bahasa"),
+                langka: dataForm.get("langka") === "Ya" ? "Ya" : "Tidak",
+                sinopsis: dataForm.get("sinopsis").trim()
+            };
+
+            try {
+                const daftarBuku = JSON.parse(localStorage.getItem("daftarBuku") || "[]");
+                daftarBuku.push(buku);
+                localStorage.setItem("daftarBuku", JSON.stringify(daftarBuku));
+
+                pesan.textContent = "Buku berhasil disimpan pada penyimpanan browser.";
+                hasilSimpan.innerHTML = `
+                    <h2>Data Buku yang Disimpan</h2>
+                    <p><strong>Judul:</strong> ${aman(buku.judul)}</p>
+                    <p><strong>Penulis:</strong> ${aman(buku.penulis)}</p>
+                    <p><strong>Kategori:</strong> ${aman(buku.kategori)}</p>
+                    <p><strong>Tahun Terbit:</strong> ${aman(buku.tahun)}</p>
+                    <p><strong>Stok:</strong> ${aman(buku.stok)}</p>
+                    <p><strong>ISBN:</strong> ${aman(buku.isbn || "-")}</p>
+                    <p><strong>Tanggal Terbit:</strong> ${aman(buku.tanggal || "-")}</p>
+                    <p><strong>Situs Penerbit:</strong>
+                       ${buku.situs ? `<a href="${aman(buku.situs)}" target="_blank" rel="noopener">${aman(buku.situs)}</a>` : "-"}</p>
+                    <p><strong>Bahasa:</strong> ${aman(buku.bahasa)}</p>
+                    <p><strong>Buku Langka:</strong> ${aman(buku.langka)}</p>
+                    <p><strong>Sinopsis:</strong> ${aman(buku.sinopsis || "-")}</p>
+                `;
+                form.reset();
+            } catch (error) {
+                pesan.textContent = "Data belum dapat disimpan. Jalankan folder menggunakan Live Server dan coba lagi.";
+                console.error("Kesalahan penyimpanan:", error);
+            }
+        });
+
+        function aman(teks) {
+            return String(teks).replace(/[&<>"']/g, function(karakter) {
+                return {
+                    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+                    '"': "&quot;", "'": "&#039;"
+                }[karakter];
+            });
+        }
+    </script>
+</body>
+</html>
